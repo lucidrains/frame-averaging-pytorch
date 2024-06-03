@@ -4,6 +4,37 @@
 
 Pytorch implementation of a simple way to enable <a href="https://arxiv.org/abs/2305.05577">(Stochastic)</a> <a href="https://arxiv.org/abs/2110.03336">Frame Averaging</a> for any network
 
+## Install
+
+```bash
+$ pip install frame-averaging-pytorch
+```
+
+## Usage
+
+```python
+import torch
+from frame_averaging_pytorch import FrameAverage
+
+# contrived neural network
+
+net = torch.nn.Linear(3, 3)
+
+# wrap the network with FrameAverage
+
+net = FrameAverage(net)
+
+# pass your input to the network as usual
+
+points = torch.randn(2, 4, 1024, 3)
+
+out = net(points)
+
+out.shape # (2, 4, 1024, 3)
+
+# frame averaging is automatically taken care of, as though the network were unwrapped
+```
+
 ## Citations
 
 ```bibtex
