@@ -40,6 +40,38 @@ out.shape # (4, 1024, 3)
 # frame averaging is automatically taken care of, as though the network were unwrapped
 ```
 
+or you can also carry it out manually
+
+```python
+import torch
+from frame_averaging_pytorch import FrameAverage
+
+# contrived neural network
+
+net = torch.nn.Linear(3, 3)
+
+# frame average module without passing in network
+
+fa = FrameAverage()
+
+# pass the 3d points and mask to FrameAverage forward
+
+points = torch.randn(4, 1024, 3)
+mask = torch.ones(4, 1024).bool()
+
+framed_inputs, frame_average_fn = fa(points, frame_average_mask = mask)
+
+# network forward
+
+net_out = net(framed_inputs)
+
+# frame average
+
+frame_averaged = frame_average_fn(net_out)
+
+frame_averaged.shape # (4, 1024, 3)
+```
+
 ## Citations
 
 ```bibtex
