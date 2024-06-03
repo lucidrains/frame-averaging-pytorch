@@ -2,7 +2,7 @@
 
 ## Frame Averaging - Pytorch (wip)
 
-Pytorch implementation of a simple way to enable <a href="https://arxiv.org/abs/2305.05577">(Stochastic)</a> <a href="https://arxiv.org/abs/2110.03336">Frame Averaging</a> for any network
+Pytorch implementation of a simple way to enable <a href="https://arxiv.org/abs/2305.05577">(Stochastic)</a> <a href="https://arxiv.org/abs/2110.03336">Frame Averaging</a> for any network. This technique was recently adopted by Prescient Design in <a href="https://arxiv.org/abs/2308.05027">AbDiffuser</a>
 
 ## Install
 
