@@ -85,16 +85,15 @@ class FrameAverage(Module):
             frame_average_mask = rearrange(frame_average_mask, '... -> ... 1')
             points = points * frame_average_mask
 
-        # shape must end with (seq, dim)
+        # shape must end with (batch, seq, dim)
 
-        lead_dims, suffix_dims = points.shape[:-2], points.shape[-2:]
-        points = points.reshape(-1, *suffix_dims)
+        batch, seq_dim, input_dim = points.shape
 
         # frame averaging logic
 
         if exists(frame_average_mask):
             num = reduce(points, 'b n d -> b 1 d', 'sum')
-            den = reduce(frame_average_mask.float(), 'b n -> b 1 1', 'sum')
+            den = reduce(frame_average_mask.float(), 'b n 1 -> b 1 1', 'sum')
             centroid = num / den.clamp(min = 1)
         else:
             centroid = reduce(points, 'b n d -> b 1 d', 'mean')
@@ -166,10 +165,5 @@ class FrameAverage(Module):
             out = reduce(out, 'b f ... -> b ...', 'mean')
         else:
             out = rearrange(out, 'b 1 ... -> b ...')
-
-        # restore leading dimensions and return output
-
-        out_suffix_dims = out.shape[1:]
-        out = out.reshape(*lead_dims, *out_suffix_dims)
 
         return out
