@@ -145,7 +145,7 @@ class FrameAverage(Module):
 
                 mapped_args_kwargs.append(el)
 
-            args, kwargs = tree_unflatten(tree_spec, flattened_args_kwargs)
+            args, kwargs = tree_unflatten(tree_spec, mapped_args_kwargs)
 
         # main network forward
 
