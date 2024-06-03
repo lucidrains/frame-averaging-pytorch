@@ -104,6 +104,9 @@ class FrameAverage(Module):
 
         centered_points = points - centroid
 
+        if exists(frame_average_mask):
+            centered_points = centered_points * frame_average_mask
+
         covariance = einsum(centered_points, centered_points, 'b n d, b n e -> b d e')
 
         _, eigenvectors = torch.linalg.eigh(covariance)
