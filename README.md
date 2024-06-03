@@ -30,11 +30,12 @@ net = FrameAverage(
 
 # pass your input to the network as usual
 
-points = torch.randn(2, 4, 1024, 3)
+points = torch.randn(4, 1024, 3)
+mask = torch.ones(4, 1024).bool()
 
-out = net(points)
+out = net(points, frame_average_mask = mask)
 
-out.shape # (2, 4, 1024, 3)
+out.shape # (4, 1024, 3)
 
 # frame averaging is automatically taken care of, as though the network were unwrapped
 ```
