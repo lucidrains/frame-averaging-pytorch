@@ -143,7 +143,7 @@ class FrameAverage(Module):
 
             for el in flattened_args_kwargs:
                 if torch.is_tensor(el):
-                    el = rearrange(el, 'b ... -> (b f) ...', f = num_frames)
+                    el = repeat(el, 'b ... -> (b f) ...', f = num_frames)
 
                 mapped_args_kwargs.append(el)
 
