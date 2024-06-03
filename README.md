@@ -24,6 +24,7 @@ net = torch.nn.Linear(3, 3)
 
 net = FrameAverage(
     net,
+    dim = 3,           # defaults to 3 for spatial, but can be any value
     stochastic = True  # whether to use stochastic variant from FAENet (one frame sampled at random)
 )
 
