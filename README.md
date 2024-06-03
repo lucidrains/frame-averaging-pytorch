@@ -22,7 +22,10 @@ net = torch.nn.Linear(3, 3)
 
 # wrap the network with FrameAverage
 
-net = FrameAverage(net)
+net = FrameAverage(
+    net,
+    stochastic = True  # whether to use stochastic variant from FAENet (one frame sampled at random)
+)
 
 # pass your input to the network as usual
 

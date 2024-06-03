@@ -1,3 +1,5 @@
+from random import randrange
+
 import torch
 from torch import nn
 from torch.nn import Module
@@ -29,8 +31,6 @@ class FrameAverage(Module):
         stochastic = False
     ):
         super().__init__()
-        assert not stochastic, 'stochastic not implemented yet'
-
         self.net = net
 
         assert dim > 1
@@ -111,7 +111,22 @@ class FrameAverage(Module):
 
         _, eigenvectors = torch.linalg.eigh(covariance)
 
-        frames = rearrange(eigenvectors, 'b d e -> b 1 d e') * rearrange(self.operations, 'f e -> f 1 e')
+        # if stochastic, just select one random operation
+
+        num_frames = self.num_frames
+        operations = self.operations
+
+        if self.stochastic:
+            rand_frame_index = randrange(self.num_frames)
+
+            operations = operations[rand_frame_index:(rand_frame_index + 1)]
+            num_frames = 1
+
+        # frames
+
+        frames = rearrange(eigenvectors, 'b d e -> b 1 d e') * rearrange(operations, 'f e -> f 1 e')
+
+        # inverse frame op
 
         inputs = einsum(frames, centered_points, 'b f d e, b n d -> b f n e')
 
@@ -125,15 +140,18 @@ class FrameAverage(Module):
 
         # split frames from batch
 
-        out = rearrange(out, '(b f) ... -> b f ...', f = self.num_frames)
+        out = rearrange(out, '(b f) ... -> b f ...', f = num_frames)
 
         # apply frames
 
         out = einsum(frames, out, 'b f d e, b f n e -> b f n d')
 
-        # averaging across frames, thus "frame averaging"
+        if not self.stochastic:
+            # averaging across frames, thus "frame averaging"
 
-        out = reduce(out, 'b f ... -> b ...', 'mean')
+            out = reduce(out, 'b f ... -> b ...', 'mean')
+        else:
+            out = rearrange(out, 'b 1 ... -> b ...')
 
         # restore leading dimensions and return output
 
