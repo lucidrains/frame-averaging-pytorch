@@ -155,10 +155,12 @@ class FrameAverage(Module):
 
         out = rearrange(out, '(b f) ... -> b f ...', f = num_frames)
 
-        if not self.invariant_output:
-            # apply frames
+        if self.invariant_output:
+            return out
 
-            out = einsum(frames, out, 'b f d e, b f n e -> b f n d')
+        # apply frames
+
+        out = einsum(frames, out, 'b f d e, b f n e -> b f n d')
 
         if not self.stochastic:
             # averaging across frames, thus "frame averaging"
