@@ -1,11 +1,12 @@
 from random import randrange
+from optree import tree_flatten, tree_unflatten
 
 import torch
 from torch import nn
 from torch.nn import Module
 import torch.nn.functional as F
 
-from einops import rearrange, repeat, reduce, einsum, pack, unpack
+from einops import rearrange, repeat, reduce, einsum
 
 # helper functions
 
@@ -132,6 +133,22 @@ class FrameAverage(Module):
 
         inputs = rearrange(inputs, 'b f ... -> (b f) ...')
 
+        # if batch is expanded by number of frames, any tensor being passed in for args and kwargs needed to be expanded as well
+        # automatically take care of this
+
+        if not self.stochastic:
+            flattened_args_kwargs, tree_spec = tree_flatten([args, kwargs])
+
+            mapped_args_kwargs = []
+
+            for el in flattened_args_kwargs:
+                if torch.is_tensor(el):
+                    el = rearrange(el, 'b ... -> (b f) ...', f = num_frames)
+
+                mapped_args_kwargs.append(el)
+
+            args, kwargs = tree_unflatten(tree_spec, flattened_args_kwargs)
+
         # main network forward
 
         out = self.net(inputs, *args, **kwargs)
@@ -154,7 +171,7 @@ class FrameAverage(Module):
 
         # restore leading dimensions and return output
 
-        suffix_dims = out.shape[1:]
-        out = out.reshape(*lead_dims, *suffix_dims)
+        out_suffix_dims = out.shape[1:]
+        out = out.reshape(*lead_dims, *out_suffix_dims)
 
         return out
