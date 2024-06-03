@@ -150,6 +150,14 @@ class FrameAverage(Module):
 
         out = self.net(inputs, *args, **kwargs)
 
+        # handle if output is a tuple - just follow convention that first output is the one to be frame averaged
+        # (todo) - handle multiple outputs that need frame averaging
+
+        is_multiple_output = isinstance(out, tuple)
+
+        if is_multiple_output:
+            out, *rest = out
+
         # split frames from batch
 
         out = rearrange(out, '(b f) ... -> b f ...', f = num_frames)
@@ -166,4 +174,8 @@ class FrameAverage(Module):
         else:
             out = rearrange(out, 'b 1 ... -> b ...')
 
-        return out
+        if not is_multiple_output:
+            return out
+
+        return (out, *rest)
+
