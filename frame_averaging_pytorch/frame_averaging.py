@@ -2,9 +2,7 @@ from random import randrange
 from optree import tree_flatten, tree_unflatten
 
 import torch
-from torch import nn
 from torch.nn import Module
-import torch.nn.functional as F
 
 from einops import rearrange, repeat, reduce, einsum
 
@@ -44,7 +42,7 @@ class FrameAverage(Module):
 
         for ind in range(dim):
             dim_slice = [None] * dim
-            dim_slice[ind] = Ellipsis
+            dim_slice[ind] = colon
 
             accum.append(directions[dim_slice])
 
@@ -79,7 +77,7 @@ class FrameAverage(Module):
         f - frames
         """
 
-        assert points.shape[-1] == self.dim, f'expected points of dimension {self.dim}, but received {t.shape[-1]}'
+        assert points.shape[-1] == self.dim, f'expected points of dimension {self.dim}, but received {points.shape[-1]}'
 
         # account for variable lengthed points
 
