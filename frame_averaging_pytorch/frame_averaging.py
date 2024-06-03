@@ -67,6 +67,7 @@ class FrameAverage(Module):
         points,
         *args,
         frame_average_mask = None,
+        return_framed_inputs_and_averaging_function = False,
         **kwargs,
     ):
         """
@@ -126,6 +127,28 @@ class FrameAverage(Module):
 
         inputs = einsum(frames, centered_points, 'b f d e, b n d -> b f n e')
 
+        # define the frame averaging function
+
+        def frame_average(out):
+            if not self.invariant_output:
+                # apply frames
+
+                out = einsum(frames, out, 'b f d e, b f ... e -> b f ... d')
+
+            if not self.stochastic:
+                # averaging across frames, thus "frame averaging"
+
+                out = reduce(out, 'b f ... -> b ...', 'mean')
+            else:
+                out = rearrange(out, 'b 1 ... -> b ...')
+
+            return out
+
+        # if one wants to handle the framed inputs externally
+
+        if return_framed_inputs_and_averaging_function:
+            return inputs, frame_average
+
         # merge frames into batch
 
         inputs = rearrange(inputs, 'b f ... -> (b f) ...')
@@ -162,17 +185,7 @@ class FrameAverage(Module):
 
         out = rearrange(out, '(b f) ... -> b f ...', f = num_frames)
 
-        if not self.invariant_output:
-            # apply frames
-
-            out = einsum(frames, out, 'b f d e, b f n e -> b f n d')
-
-        if not self.stochastic:
-            # averaging across frames, thus "frame averaging"
-
-            out = reduce(out, 'b f ... -> b ...', 'mean')
-        else:
-            out = rearrange(out, 'b 1 ... -> b ...')
+        out = frame_average(out)
 
         if not is_multiple_output:
             return out
