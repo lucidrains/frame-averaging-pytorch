@@ -15,12 +15,6 @@ def exists(v):
 def default(v, d):
     return v if exists(v) else d
 
-def pack_one(t, pattern):
-    return pack([t], pattern)
-
-def unpack_one(t, ps, pattern):
-    return unpack(t, ps, pattern)[0]
-
 # main class
 
 class FrameAverage(Module):
@@ -28,7 +22,8 @@ class FrameAverage(Module):
         self,
         net: Module,
         dim = 3,
-        stochastic = False
+        stochastic = False,
+        invariant_output = False
     ):
         super().__init__()
         self.net = net
@@ -66,6 +61,8 @@ class FrameAverage(Module):
 
         self.stochastic = stochastic
 
+        self.invariant_output = invariant_output
+
     def forward(
         self,
         points,
@@ -91,7 +88,8 @@ class FrameAverage(Module):
 
         # shape must end with (seq, dim)
 
-        points, batch_ps = pack_one(points, '* n d')
+        lead_dims, suffix_dims = points.shape[:-2], points.shape[-2:]
+        points = points.reshape(-1, *suffix_dims)
 
         # frame averaging logic
 
@@ -142,9 +140,10 @@ class FrameAverage(Module):
 
         out = rearrange(out, '(b f) ... -> b f ...', f = num_frames)
 
-        # apply frames
+        if not self.invariant_output:
+            # apply frames
 
-        out = einsum(frames, out, 'b f d e, b f n e -> b f n d')
+            out = einsum(frames, out, 'b f d e, b f n e -> b f n d')
 
         if not self.stochastic:
             # averaging across frames, thus "frame averaging"
@@ -155,9 +154,7 @@ class FrameAverage(Module):
 
         # restore leading dimensions and return output
 
-        out = unpack_one(out, batch_ps, '* n d')
-
-        if exists(frame_average_mask):
-            out = out * frame_average_mask
+        suffix_dims = out.shape[1:]
+        out = out.reshape(*lead_dims, *suffix_dims)
 
         return out
