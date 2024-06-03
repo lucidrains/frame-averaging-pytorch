@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from random import randrange
 from optree import tree_flatten, tree_unflatten
 
@@ -19,7 +21,7 @@ def default(v, d):
 class FrameAverage(Module):
     def __init__(
         self,
-        net: Module,
+        net: Module | None = None,
         dim = 3,
         stochastic = False,
         invariant_output = False
@@ -146,7 +148,7 @@ class FrameAverage(Module):
 
         # if one wants to handle the framed inputs externally
 
-        if return_framed_inputs_and_averaging_function:
+        if return_framed_inputs_and_averaging_function or not exists(self.net):
             return inputs, frame_average
 
         # merge frames into batch
