@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from random import randrange
-from optree import tree_flatten, tree_unflatten
+from optree import tree_map
 
 import torch
 from torch.nn import Module
@@ -167,17 +167,13 @@ class FrameAverage(Module):
         # automatically take care of this
 
         if not self.stochastic:
-            flattened_args_kwargs, tree_spec = tree_flatten([args, kwargs])
-
-            mapped_args_kwargs = []
-
-            for el in flattened_args_kwargs:
-                if torch.is_tensor(el):
-                    el = repeat(el, 'b ... -> (b f) ...', f = num_frames)
-
-                mapped_args_kwargs.append(el)
-
-            args, kwargs = tree_unflatten(tree_spec, mapped_args_kwargs)
+            args, kwargs = tree_map(
+                lambda el: (
+                    rearrange(el, 'b ... -> (b f) ...', f = num_frames)
+                    if torch.is_tensor(el)
+                    else el
+                )
+            , (args, kwargs))
 
         # main network forward
 
