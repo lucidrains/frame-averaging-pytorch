@@ -24,7 +24,8 @@ class FrameAverage(Module):
         net: Module | None = None,
         dim = 3,
         stochastic = False,
-        invariant_output = False
+        invariant_output = False,
+        return_stochastic_as_augmented_pos = False  # will simply return points as augmented points of same shape on forward
     ):
         super().__init__()
         self.net = net
@@ -61,6 +62,9 @@ class FrameAverage(Module):
         # one frame is selected at random
 
         self.stochastic = stochastic
+        self.return_stochastic_as_augmented_pos = return_stochastic_as_augmented_pos
+
+        # invariant output setting
 
         self.invariant_output = invariant_output
 
@@ -149,6 +153,10 @@ class FrameAverage(Module):
         # if one wants to handle the framed inputs externally
 
         if return_framed_inputs_and_averaging_function or not exists(self.net):
+
+            if self.stochastic and self.return_stochastic_as_augmented_pos:
+                return rearrange(inputs, 'b 1 ... -> b ...')
+
             return inputs, frame_average
 
         # merge frames into batch
