@@ -1,6 +1,6 @@
 [project]
 name = "frame-averaging-pytorch"
-version = "0.0.16"
+version = "0.0.17"
 description = "Frame Averaging"
 authors = [
     { name = "Phil Wang", email = "lucidrains@gmail.com" }
@@ -25,7 +25,7 @@ classifiers=[
 dependencies = [
     "torch>=2.0",
     "einops>=0.8.0",
-    'optree',
+    "optree"
 ]
 
 [project.urls]
@@ -47,4 +47,4 @@ dev-dependencies = []
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["frame-averaging-pytorch"]
+packages = ["frame_averaging_pytorch"]

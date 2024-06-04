@@ -193,4 +193,3 @@ class FrameAverage(Module):
             return out
 
         return (out, *rest)
-
