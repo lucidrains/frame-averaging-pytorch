@@ -169,7 +169,7 @@ class FrameAverage(Module):
         if not self.stochastic:
             args, kwargs = tree_map(
                 lambda el: (
-                    rearrange(el, 'b ... -> (b f) ...', f = num_frames)
+                    repeat(el, 'b ... -> (b f) ...', f = num_frames)
                     if torch.is_tensor(el)
                     else el
                 )
@@ -179,21 +179,9 @@ class FrameAverage(Module):
 
         out = self.net(inputs, *args, **kwargs)
 
-        # handle if output is a tuple - just follow convention that first output is the one to be frame averaged
-        # (todo) - handle multiple outputs that need frame averaging
+        # use tree map to handle multiple outputs
 
-        is_multiple_output = isinstance(out, tuple)
+        out = tree_map(lambda t: rearrange(t, '(b f) ... -> b f ...', f = num_frames), out)
+        out = tree_map(lambda t: frame_average(t) if torch.is_tensor(t) else t, out)
 
-        if is_multiple_output:
-            out, *rest = out
-
-        # split frames from batch
-
-        out = rearrange(out, '(b f) ... -> b f ...', f = num_frames)
-
-        out = frame_average(out)
-
-        if not is_multiple_output:
-            return out
-
-        return (out, *rest)
+        return out

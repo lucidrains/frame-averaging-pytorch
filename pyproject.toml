@@ -1,6 +1,6 @@
 [project]
 name = "frame-averaging-pytorch"
-version = "0.0.19"
+version = "0.1.0"
 description = "Frame Averaging"
 authors = [
     { name = "Phil Wang", email = "lucidrains@gmail.com" }
@@ -34,6 +34,14 @@ Repository = "https://github.com/lucidrains/frame-averaging-pytorch"
 
 [project.optional-dependencies]
 examples = []
+test = [
+    "pytest"
+]
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]
 
 [build-system]
 requires = ["hatchling"]
