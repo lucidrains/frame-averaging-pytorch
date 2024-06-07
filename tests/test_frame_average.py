@@ -58,7 +58,7 @@ def test_frame_average_multiple_inputs_and_outputs():
         def forward(self, x, mask):
             x = x.masked_fill(~mask[..., None], 0.)
             hidden = self.net(x)
-            return self.to_out1(hidden), self.to_out2(hidden)
+            return 0., self.to_out1(hidden), self.to_out2(hidden)
 
     net = Network()
     net = FrameAverage(net)
@@ -66,6 +66,6 @@ def test_frame_average_multiple_inputs_and_outputs():
     points = torch.randn(4, 1024, 3)
     mask = torch.ones(4, 1024).bool()
 
-    out1, out2 = net(points, mask, frame_average_mask = mask)
+    _, out1, out2 = net(points, mask, frame_average_mask = mask)
 
     assert out1.shape == out2.shape == points.shape

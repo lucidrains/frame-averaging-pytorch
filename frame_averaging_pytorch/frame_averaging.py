@@ -181,7 +181,7 @@ class FrameAverage(Module):
 
         # use tree map to handle multiple outputs
 
-        out = tree_map(lambda t: rearrange(t, '(b f) ... -> b f ...', f = num_frames), out)
+        out = tree_map(lambda t: rearrange(t, '(b f) ... -> b f ...', f = num_frames) if torch.is_tensor(t) else t, out)
         out = tree_map(lambda t: frame_average(t) if torch.is_tensor(t) else t, out)
 
         return out
