@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from random import randrange
-from optree import tree_map
 
 import torch
 from torch.nn import Module
+from torch.utils._pytree import tree_map
 
 from einops import rearrange, repeat, reduce, einsum
 

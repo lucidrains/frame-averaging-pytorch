@@ -1,6 +1,6 @@
 [project]
 name = "frame-averaging-pytorch"
-version = "0.1.1"
+version = "0.1.2"
 description = "Frame Averaging"
 authors = [
     { name = "Phil Wang", email = "lucidrains@gmail.com" }
@@ -25,7 +25,6 @@ classifiers=[
 dependencies = [
     "torch>=2.0",
     "einops>=0.8.0",
-    "optree"
 ]
 
 [project.urls]
